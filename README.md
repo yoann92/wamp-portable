@@ -1,5 +1,5 @@
-Wamp Portable
-=============
+WamPortable
+===========
 
 A DOS Batch script to make [WampServer](http://www.wampserver.com/) portable.
 
