@@ -3,7 +3,7 @@ SETLOCAL EnableDelayedExpansion
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::                                                                                ::
-::  Wamp-Portable                                                                 ::
+::  WamPortable                                                                   ::
 ::                                                                                ::
 ::  Author: Cr@zy                                                                 ::
 ::  Contact: http://www.crazyws.fr                                                ::
