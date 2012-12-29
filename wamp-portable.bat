@@ -3,7 +3,7 @@ SETLOCAL EnableDelayedExpansion
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::                                                                                ::
-::  WamPortable                                                                   ::
+::  Wamp-Portable                                                                 ::
 ::                                                                                ::
 ::  Author: Cr@zy                                                                 ::
 ::  Contact: http://www.crazyws.fr                                                ::
@@ -27,7 +27,7 @@ SETLOCAL EnableDelayedExpansion
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 CLS
-TITLE WamPortable v1.0
+TITLE WamPortable v1.1
 
 ECHO.
 ECHO.
@@ -39,8 +39,8 @@ ECHO    #   @   @ @@@@@ @ @ @ @@@@@ @   @ @@@@@   @   @@@@@ @@@@@ @     @@@@    
 ECHO    #    @@@  @   @ @   @ @     @   @ @  @    @   @   @ @   @ @     @       #
 ECHO    #    @ @  @   @ @   @ @     @@@@@ @   @   @   @   @ @@@@@ @@@@@ @@@@@   #
 ECHO    #                                                                       #
-ECHO    #   Author : Cr@zy                               Date    : 12/12/2012   #
-ECHO    #   Email  : webmaster@crazyws.fr                Version : 1.0          #
+ECHO    #   Author : Cr@zy                               Date    : 12/29/2012   #
+ECHO    #   Email  : webmaster@crazyws.fr                Version : 1.1          #
 ECHO    #                                                                       #
 ECHO    #########################################################################
 
@@ -69,6 +69,7 @@ while(@ob_end_clean());
 $timezone = 'Europe/Paris';
 $enableLogs = true;
 $autoLaunch = false;
+$maxBackups = 10;
 
 ////////////////////////////////////////////////
 // No edits necessary beyond this line
@@ -80,7 +81,8 @@ $scriptName = basename(__FILE__);
 $wampConfigPath = getcwd() . '\\wampmanager.conf';
 $wampIniPath = getcwd() . '\\wampmanager.ini';
 $wampTplPath = getcwd() . '\\wampmanager.tpl';
-$backupsPath = getcwd() . '\\backups\\' . date('YmdHis');
+$rootBackupPath = getcwd() . '\\backups\\';
+$backupsPath = $rootBackupPath . date('YmdHis');
 $logsPath = getcwd() . '\\wamp-portable.log';
 
 if ($enableLogs) file_put_contents($logsPath, "@@@\n@@@ START WAMP-PORTABLE " . date('YmdHis') . "\n@@@", FILE_APPEND);
@@ -227,6 +229,27 @@ function replaceWithNewPath($oldPath, $newPath, $filePath) {
     return $count;
 }
 
+function deleteFolder($folderpath) {
+    if (is_dir($folderpath)) {
+        $dir_handle = opendir($folderpath);
+    }
+    if (!$dir_handle) {
+        return false;
+    }
+    while ($file = readdir( $dir_handle )) {
+        if ($file != '.' && $file != '..') {
+            if (!is_dir($folderpath . '/' . $file)) {
+                unlink($folderpath . '/' . $file);
+            } else {
+                deleteFolder($folderpath . '/' . $file);
+            }
+        }
+    }
+    closedir($dir_handle);
+    rmdir($folderpath);
+    return true;
+}
+
 ////////////////////////////////////////////////
 // Start process
 ////////////////////////////////////////////////
@@ -285,6 +308,11 @@ $mysqlPath = end($mysqlArr);
 $mysqlPath = $mysqlPath['path'] . '\\' . $mysqlPath['bin'];
 $mysqlScript = $mysqlPath . " --remove wampmysqld";
 `$mysqlScript`;
+
+// First launch ?
+if (!is_dir($rootBackupPath)) {
+    $backupsPath = $rootBackupPath . "#original";
+}
 
 // Create backups directory
 if (!is_dir($backupsPath)) {
@@ -388,6 +416,28 @@ $apacheService = $apachePath . " " . $apacheInstallParams;
 logInfo("Install wampapache service", true);
 echoListener("\n");
 `$apacheService`;
+
+// Delete old backups
+if ($maxBackups > 0) {
+    $listBackups = array();
+    if ($handle = opendir($rootBackupPath)) {
+        while (false !== ($file = readdir($handle))) {
+            if ($file != "." && $file != ".." && is_dir($rootBackupPath . $file) && is_numeric($file)) {
+                $listBackups[] = $rootBackupPath . $file;
+            }
+        }
+    }
+    if (!empty($listBackups) && count($listBackups) > $maxBackups) {
+        sort($listBackups);
+        $toDelete = count($listBackups) - $maxBackups;
+        $listBackupsDelete = array();
+        for ($i=0; $i<$toDelete; $i++) {
+            $listBackupsDelete[] = $listBackups[$i];
+            deleteFolder($listBackups[$i]);
+        }
+        logInfo("Delete old backups", count($listBackupsDelete) > 0, $listBackupsDelete, false);
+    }
+}
 
 // Now ready to use
 echoListener("\n\n");

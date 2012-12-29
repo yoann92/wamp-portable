@@ -1,5 +1,5 @@
-WamPortable
-===========
+Wamp Portable
+=============
 
 A DOS Batch script to make [WampServer](http://www.wampserver.com/) portable.
 
@@ -21,6 +21,7 @@ Before running the script, you can change some variables.
 * **$timezone** - The default timezone used by all date/time functions. Default : ``Europe/Paris``
 * **$enableLogs** - Enable wamp-portable log file. Generate ``wamp-portable.log`` file. Default : ``true``
 * **$autoLaunch** - Automatically closes the wamp-portable window. Default : ``false``
+* **$maxBackups** - Maximum number of backups to keep (0 = unlimited). Default : ``10``
 
 Next,
 
@@ -39,4 +40,4 @@ Usage
 More infos
 ----------
 
-http://www.crazyws.fr/dev/applis-et-scripts/wamportable-mettre-wampserver-sur-cle-usb-G5980.html
+http://www.crazyws.fr/dev/applis-et-scripts/wamp-portable-G5980.html
